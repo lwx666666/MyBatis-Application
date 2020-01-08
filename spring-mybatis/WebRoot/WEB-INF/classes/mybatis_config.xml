@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration  
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-config.dtd"> 
+<configuration>
+	<settings>
+		<!-- 设置项名称，取值
+		开启驼峰命名，将数据库中a_column映射为实体类中的aColumn -->
+		<!-- <setting name="mapUnderscoreToCamelCase " value="true"/> -->
+		<setting name="jdbcTypeForNull" value="NULL"/><!-- 使用于mysql和oracle -->
+		<!--<setting name="cacheEnabled" value="true"/> 开启二级缓存 -->
+	</settings>
+	
+	<!-- 为java bean起别名 ，默认是类名小写-->
+	<typeAliases>
+		<!-- <typeAlias type="com.mars.model.MyEmp" alias="emp"/> -->
+		<!-- 批量取别名，默认为类名小写，其实不区分大小写,不要和mybaits中已定义的别名冲突-->
+		<package name="com.mars.model"/>
+		<!-- 如果包中包含的子包中的类和包中的类重名，需要使用@Alias注解区分 -->
+	</typeAliases>
+	
+    <!-- databaseIdProvider用于配置mybatis对多数据库厂商的支持 -->
+    <databaseIdProvider type="DB_VENDOR">
+    	<!-- 不同数据库厂商起别名，数据库厂商的名字不能写错 -->
+    	<property name="MySQL" value="mysql"/>
+    	<property name="Oracle" value="orcl"/>
+    	<property name="SQL Server" value="sqlserver"/>
+    </databaseIdProvider>
+</configuration>

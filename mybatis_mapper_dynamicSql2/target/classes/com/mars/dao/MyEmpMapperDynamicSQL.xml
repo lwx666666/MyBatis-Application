@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.dao.MyEmpMapperDynamicSQL">
+
+	<insert id="addEmp" parameterType="com.mars.model.MyEmp">
+		INSERT INTO myemp (empno,ename,job,hiredate,sal) 
+		VALUES (#{empno},#{ename},#{job},#{hiredate},#{sal})
+	</insert>
+	<!-- 动态sql，使用OGNL表达式 
+		OGNL表达中，字符串为数值的比较可以使用==或者!=
+		解决拼接sql当第一个语句不存在where后会直接跟and保存问题方法：
+			1.在WHERE 中添加1=1，在每条if语句的前面添加and
+			2.使用where标签，会将if判断中多出来的and或者or去掉
+	-->
+	<select id="findEmpsByIf" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp 
+		<!-- WHERE 1=1 -->
+		<where>
+			<if test="ename != null and ename.trim().length() &gt; 0">
+				ename LIKE #{ename} 
+			</if>
+			<if test="sal != null" >
+				AND sal > #{sal} 
+			</if>
+			<if test="hiredate != null">
+				AND hiredate &lt; #{hiredate}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findEmpsByIf2" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp 
+		<!-- 使用trim标签可以去除前缀或者后缀的多余字符，自定义字符串截取规则-->
+		<trim prefix="where" prefixOverrides="and|or" suffixOverrides="and|or">
+			<if test="ename != null and ename.trim().length() &gt; 0">
+				ename LIKE #{ename} AND
+			</if>
+			<if test="sal != null" >
+				sal > #{sal} AND
+			</if>
+			<if test="hiredate != null">
+				hiredate &lt; #{hiredate}
+			</if>
+		</trim>
+	</select>
+	
+	<select id="findEmpsByChoose" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp
+		<where>
+			<choose>
+				<when test="ename != null">
+					ename LIKE #{ename}
+				</when>
+				<when test="hiredate != null">
+					hiredate &lt;= #{hiredate}
+				</when>
+				<when test="sal >= 3000">
+					sal > #{sal}
+				</when>
+				<otherwise>
+					NVL(comm,0) > 0
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+	
+	<!-- 动态更新 -->
+	<update id="updateEmpByDynamicSql" parameterType="com.mars.model.MyEmp">
+		UPDATE myemp
+		<!-- 1.使用set标签 -->
+		<!-- <set>
+			<if test="ename != null">
+				ename=#{ename},
+			</if>
+			<if test="job != null">
+				job=#{job},
+			</if>
+			<if test="sal != null">
+				sal=#{sal},
+			</if>
+			<if test="hiredate != null">
+				hiredate=#{hiredate}
+			</if>
+		</set> -->
+		<!-- 2.使用trim标签 -->
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="ename != null">
+				ename=#{ename},
+			</if>
+			<if test="job != null">
+				job=#{job},
+			</if>
+			<if test="sal != null">
+				sal=#{sal},
+			</if>
+			<if test="hiredate != null">
+				hiredate=#{hiredate}
+			</if>
+		</trim>
+		WHERE empno=#{empno}
+	</update>
+	<!-- 集合遍历 -->
+	<select id="findEmpsByForeach" resultType="com.mars.model.MyEmp">
+		<!-- collection指定要遍历的集合，list元素的值会特殊处理封装为map，map的key就是list
+		item：从集合中取出来的每个元素，
+		separator：每个元素之间的分割符
+		index：遍历集合中的索引序号，如果是map则是key
+		 -->
+		SELECT * FROM myemp WHERE empno IN
+		<foreach collection="empnos" item="empno" separator="," 
+			open="(" close=")">
+			#{empno}
+		</foreach>
+	</select>
+	<!-- 批量插入 
+		1.遍历VALUES后面插入的值，mysql支持
+		2.使用全sql循环插入，mysql下需要连接url添加allowMultiQueries=true
+	-->
+	<!-- <insert id="batchInsert" parameterType="com.mars.model.MyEmp">
+		INSERT INTO 
+		myemp (empno,ename,job,mgr,hiredate,sal,comm,deptno)
+		VALUES
+		<foreach collection="emps" item="emp"  separator=",">
+			(#{emp.empno},#{emp.ename},#{emp.job},#{emp.mgr},#{emp.hiredate},#{emp.sal},#{emp.comm},#{emp.dept.deptno})
+		</foreach>
+		<foreach collection="emps" item="emp" separator=";">
+			INSERT INTO 
+			myemp (empno,ename,job,mgr,hiredate,sal,comm,deptno)
+			VALUES
+			(#{emp.empno},#{emp.ename},#{emp.job},#{emp.mgr},#{emp.hiredate},#{emp.sal},#{emp.comm},#{emp.dept.deptno})
+		</foreach>
+	</insert> -->
+	
+	<!-- oracle数据库批量保存
+		1.多个insert语句放在begin ... end中
+		2.使用中间表
+			INSERT INTO myemp (empno,ename,job,mgr,hiredate,sal,comm,deptno) 
+			SELECT empno,ename,job,mgr,hiredate,sal,comm,deptno
+			FROM (SELECT 1111 empno,'HELLEN' ename,'ANALYST' job,NULL mgr,TO_DATE('1992-09-19','yyyy-mm-dd') hiredate,3000 sal,NULL comm,20 deptno from dual 
+			union SELECT 2222 empno,'YUHEAI' ename,'MANAGER' job,NULL mgr,TO_DATE('2011-10-19','yyyy-mm-dd') hiredate,5000 sal,NULL comm,20 deptno from dual);
+	 -->
+	 
+	 <!-- <insert id="batchInsert" parameterType="com.mars.model.MyEmp">
+		<foreach collection="emps" item="emp" open="begin" close="end;">
+			INSERT INTO 
+			myemp (empno,ename,job,mgr,hiredate,sal,comm,deptno)
+			VALUES
+			(#{emp.empno},#{emp.ename},#{emp.job},#{emp.mgr},#{emp.hiredate},#{emp.sal},#{emp.comm},#{emp.dept.deptno});
+		</foreach>
+	</insert> -->
+	
+	<insert id="batchInsert" parameterType="com.mars.model.MyEmp">
+		INSERT INTO myemp (
+			<!-- 引用sql片段 -->
+			<include refid="myEmpColumn">
+				<!-- include中可以自定义属性 -->
+				<property name="myComm" value="comm"/>
+			</include>
+		) 
+		<foreach collection="emps" item="emp" open="SELECT empno,ename,job,mgr,hiredate,sal,comm,deptno FROM (" close=")" separator="union">
+			SELECT #{emp.empno} empno,#{emp.ename} ename,#{emp.job} job,#{emp.mgr} mgr,#{emp.hiredate} hiredate,#{emp.sal} sal,#{emp.comm} comm,#{emp.dept.deptno} deptno from dual
+		</foreach>
+	</insert>
+	<!-- mybatis中的内置属性
+		1._parameter：代表整个参数
+			Mapper接口中的方法只有一个参数，则_parameter代表这个参数
+			如果方法中有多个参数，则会封装为一个map集合
+		2._databaseId：代表databaseIdProvider，则_databaseId代表当前数据库的别名
+	 -->
+	<select id="findEmpsInnerParam" resultType="com.mars.model.MyEmp">
+		<!-- 根据数据库环境查询 -->
+		<if test="_databaseId == 'mysql'">
+			SELECT * FROM myemp
+			<if test="_parameter != null">
+				WHERE empno = #{_parameter.empno}
+			</if>
+		</if>
+		<!-- 使用bind标签可以将ognl表达式的值绑定到一个变量上面 ，
+			将'_' + ename + '%'值绑定到_ename上
+		-->
+		<bind name="_ename" value="'_' + ename + '%'"/>
+		<if test="_databaseId == 'orcl'">
+			SELECT * FROM myemp
+			<if test="_parameter != null">
+				WHERE ename LIKE #{_ename}
+			</if>
+		</if>
+	</select>
+	<!-- 抽取sql片段
+		1.将经常查询活则插入的列名称抽取出来，可以使用ognl标签
+		2.使用include引用抽取出来的sql片段
+		3.include中可以定义一些property，在sql中使用${proper}取值
+	 -->
+	<sql id="myEmpColumn">
+		<if test="_databaseId = 'orcl'">
+			empno,ename,job,mgr,hiredate,sal,comm,deptno
+		</if>
+	</sql>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.mapper.MyEmpMapper">
+
+	<sql id="myEmpColumn">
+		<if test="_databaseId = 'orcl'">
+			empno,ename,job,mgr,hiredate,sal,comm
+		</if>
+	</sql>
+
+	<select id="findEmpById" resultType="com.mars.model.MyEmp">
+		 SELECT 
+			<include refid="myEmpColumn"/>
+		 FROM myemp
+		<where>
+			empno = #{id}
+		</where>
+	</select>
+	
+	<insert id="addEmp" parameterType="com.mars.model.MyEmp">
+		INSERT INTO myemp
+		(empno,ename,job,mgr,hiredate,sal,comm)
+		VALUES
+		(#{empno},#{ename},#{job},#{mgr},#{hiredate},#{sal},#{comm})
+	</insert>
+</mapper>

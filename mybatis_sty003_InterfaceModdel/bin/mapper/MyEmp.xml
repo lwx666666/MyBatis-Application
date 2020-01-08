@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 每个实体类对应一个命名空间 -->
+<!-- 如果是接口创建模式namespace只能使用接口全路径 -->
+<mapper namespace="com.mars.dao.IEmpDao">
+	<!-- 查询所有 ，id名必须和接口中的方法名称一致-->
+	<select id="findAll" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp
+	</select>
+	<!-- 使用接口查询模式不需要参数类型说明 -->
+	<select id="findById" resultType="com.mars.model.MyEmp">
+		SELECT empno,ename,job,sal FROM myemp WHERE empno=#{id}
+	</select>
+</mapper>  

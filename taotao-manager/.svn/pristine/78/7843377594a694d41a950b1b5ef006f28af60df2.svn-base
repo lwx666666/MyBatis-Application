@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xmlns:context="http://www.springframework.org/schema/context"
+xsi:schemaLocation="
+http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd">
+	
+	<!--事务配置-->
+	<!--1.配置事务管理器-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!--注入dataSource数据源-->
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!--2.配置事务增强-->
+	<tx:advice id="txadvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!--传播行为-->
+			<tx:method name="save*" propagation="REQUIRED"/><!--REQUIRED表示当前匹配的方法如果有事务则在当前事务执行，如果没有事务则开启一个新的事务 -->
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="add*" propagation="REQUIRED"/>
+			<tx:method name="create*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<!--查询不需要事务-->
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true"/><!--SUPPORTS表示如果当前匹配的方法有事务则在当前事务执行，如果没有事务，则不开启事务-->
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<!--3.配置切面-->
+	<aop:config>
+		<aop:advisor advice-ref="txadvice" pointcut="execution(* com.taotao.service.*.*(..))"/>
+	</aop:config>
+</beans>

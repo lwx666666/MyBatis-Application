@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 每个实体类对应一个命名空间 -->
+<!-- 如果是接口创建模式namespace只能使用接口全路径 -->
+<mapper namespace="com.mars.dao.IMemberDao">
+	<!-- 查询所有 ，id名必须和接口中的方法名称一致-->
+	<select id="findAll" resultType="com.mars.model.Member">
+		SELECT * FROM member
+	</select>
+	<!-- 使用接口查询模式不需要参数类型说明 -->
+	<select id="findById" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE mid=#{id}
+	</select>
+	<!-- 增加 -->
+	<insert id="insert">
+		INSERT INTO member (mid,name,age,email)
+		VALUES(#{mid},#{name},#{age},#{email})
+	</insert>
+	<!-- 更新 -->
+	<update id="updateById">
+		UPDATE member 
+		SET name=#{name},age=#{age},email=#{email}
+		WHERE mid=#{mid}
+	</update>
+	<!-- 删除 -->
+	<delete id="deleteById">
+		DELETE FROM member WHERE mid=#{id}
+	</delete>
+	<!-- 多参数查询 
+		#{}采用预处理方式执行sql，传入的参数作为字符串处理
+		${}非预处理执行sql，使用sql拼接，一般由服务器传参，防止sql注入，大多参数为表名或字段名
+	-->
+	<!-- <select id="findByNameAndEmail" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name LIKE '${param1}%' AND email='${param2}'
+	</select> -->
+	<select id="findByNameAndEmail" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name LIKE '${name}%' AND email='${email}'
+	</select>
+	<select id="findByName" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name=#{name}
+	</select>
+	
+	<select id="findByNameAndEmail2" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name LIKE '${name}%' AND email='${email}'
+	</select>
+</mapper>  

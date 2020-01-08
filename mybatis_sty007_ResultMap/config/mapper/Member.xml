@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 每个实体类对应一个命名空间 -->
+<!-- 如果是接口创建模式namespace只能使用接口全路径 -->
+<mapper namespace="com.mars.dao.IMemberDao">
+	<!--属性名和表列名称不一致可以起别名-->
+	<!-- <select id="findAll" resultType="com.mars.model.Member">
+		SELECT mid m_id,name m_name,age m_age,email m_email FROM member
+	</select> -->
+	<!-- 由resultMap执行resultType -->
+	<resultMap type="com.mars.model.Member" id="memberMapper">
+		<!-- 配置主键的映射 -->
+		<id column="mid" property="m_id"/>
+		<result column="name" property="m_name"/>
+		<result column="age" property="m_age"/>
+		<result column="email" property="m_email"/>
+	</resultMap>
+	<!-- 使用resultMap就不能使用resultType -->
+	<select id="findAll" resultMap="memberMapper">
+		SELECT * FROM member
+	</select>
+</mapper>  

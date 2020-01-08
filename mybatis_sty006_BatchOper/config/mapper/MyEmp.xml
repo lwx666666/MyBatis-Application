@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 每个实体类对应一个命名空间 -->
+<!-- 如果是接口创建模式namespace只能使用接口全路径 -->
+<mapper namespace="com.mars.dao.IMyEmpDao">
+	<!-- 动态SQL -->
+	<!-- if... -->
+	<select id="findAllByIf" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp WHERE 0=0
+		<if test="ename != null">
+			AND ename LIKE '${ename}%'
+		</if>
+	</select>
+	<!-- choose...when...otherwise -->
+	<select id="findListByChoose" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp WHERE 1=1
+		<choose>
+			<when test="ename != null">
+				AND ename LIKE '%${ename}%'
+			</when>
+			<when test="sal != null">
+				AND sal >= #{sal}
+			</when>
+			<otherwise>
+				ORDER BY sal DESC
+			</otherwise>
+		</choose>
+	</select>
+	<!-- trim替换掉第一个IF的AND和OR -->
+	<select id="finListdByTrim" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="job != null">
+				job = '${job}'
+			</if>
+			<if test="ename != null">
+				AND ename LIKE '%${ename}%'
+			</if>
+			<if test="sal != null">
+				AND sal > #{sal}
+			</if>
+		</trim>
+	</select>
+	
+	<!-- 自动替换第一个AND和OR -->
+	<select id="findListByWhere" resultType="com.mars.model.MyEmp">
+		SELECT * FROM myemp
+		<where>
+			<if test="job != null">
+				OR job = '${job}'
+			</if>
+			<if test="ename != null">
+				AND ename LIKE '%${ename}%'
+			</if>
+			<if test="sal != null">
+				AND sal > #{sal}
+			</if>
+		</where>
+	</select>
+</mapper>  

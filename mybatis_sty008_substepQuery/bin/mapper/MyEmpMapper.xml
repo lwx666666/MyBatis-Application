@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.dao.IMyEmpDao">
+	<!-- 配置二级缓存
+		2.在映射配置文件中配置缓存策略,并在指定查询开启使用缓存
+	 -->
+	<cache></cache>
+	<select id="findAll" resultType="com.mars.model.MyEmp" useCache="true">
+		SELECT * FROM myemp
+	</select>
+	<!-- 使用分步查询 
+		根据员工empno查询员工信息
+		根据查询员工信息中的deptno查询部门信息
+		将部门信息关联到员工中
+	-->
+	<resultMap type="com.mars.model.MyEmp" id="substepQuery">
+		<id column="empno" property="empno"/>
+		<result column="ename" property="ename"/>
+		<result column="job" property="job"/>
+		<result column="sal" property="sal"/>
+		<result column="job" property="job"/>
+		<result column="hiredate" property="hiredate"/>
+		<!-- select指定关联对象的查询 
+			使用分步查询可以延迟加载，通过延迟加载可以在使用dept信息的时候才会从数据库查询
+		-->
+		<association property="dept" select="com.mars.dao.IMyDeptDao.findById" column="deptno"/>
+	</resultMap>
+	<select id="findById" resultMap="substepQuery">
+		SELECT * FROM myemp WHERE empno=#{id}
+	</select>
+	
+	<select id="findEmpsByDeptno" resultMap="discQuery">
+		SELECT * FROM myemp WHERE deptno=#{deptno}
+	</select>
+	
+	<!-- discriminator鉴别器的使用 -->
+	<resultMap type="com.mars.model.MyEmp" id="discQuery">
+		<id column="empno" property="empno"/>
+		<result column="ename" property="ename"/>
+		<result column="job" property="job"/>
+		<result column="sal" property="sal"/>
+		<result column="job" property="job"/>
+		<result column="hiredate" property="hiredate"/>
+		<!-- 使用 discriminator可以按照条件查询 ，工资为5000.0的员工会连带查询部门信息，其它员工不会查询部门信息
+			column为使用鉴别的列
+		-->
+		<discriminator javaType="double" column="sal">
+			<!-- case可以使用resultType也可以使用resultMap -->
+			<case value="5000.0" resultType="com.mars.model.MyEmp">
+				<association property="dept" 
+					select="com.mars.dao.IMyDeptDao.findById" 
+						column="deptno"></association></case>
+		</discriminator>
+	</resultMap>
+</mapper>  

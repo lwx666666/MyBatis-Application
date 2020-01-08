@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 每个实体类对应一个命名空间 -->
+<!-- 如果是接口创建模式namespace只能使用接口全路径 -->
+<mapper namespace="com.mars.dao.IMyDeptDao">
+	<select id="findById" resultType="com.mars.model.MyDept">
+		SELECT * FROM mydept WHERE deptno=#{id}
+	</select>
+	
+	<!-- 查询部门时连带查询子表
+		使用Collection嵌套结果集,sql查询语句的表的字段必须和resultMap中定义的字段一一对应
+	 -->
+	 <resultMap type="com.mars.model.MyDept" id="myDept">
+	 	<id column="deptno" property="deptno"/>
+	 	<result column="dname" property="dname"/>
+	 	<result column="loc" property="loc"/>
+	 	<collection property="emps" ofType="com.mars.model.MyEmp">
+	 		<id column="empno" property="empno"/>
+	 		<result column="ename" property="ename"/>
+	 		<result column="job" property="job"/>
+	 		<result column="hiredate" property="hiredate"/>
+	 	</collection>
+	 </resultMap>
+	 <select id="findEmpsByDeptno" resultMap="myDept">
+	 	SELECT d.deptno,d.dname,d.loc,e.ename,e.job,e.hiredate
+	 	FROM mydept d LEFT JOIN myemp e ON d.deptno=e.deptno
+	 	WHERE d.deptno=#{deptno}
+	 </select>
+	 
+	 <resultMap type="com.mars.model.MyDept" id="dept">
+	 	<id column="deptno" property="deptno"/>
+	 	<result column="dname" property="dname"/>
+	 	<result column="loc" property="loc"/>
+	 	<!-- 分段延时加载子表中信息 
+	 		column属性可以定义一个map形式，传递多个列名，key是传的参数，column是对应的列名
+	 		column="{key1=column1,key2=column2...}"
+	 		fetchType="eager/lazy",可以设置查询是是否延时加载
+	 	-->
+	 	<collection property="emps" 
+	 		select="com.mars.dao.IMyEmpDao.findEmpsByDeptno"
+	 		column="{deptno=deptno}" fetchType="lazy"/>
+	 </resultMap>
+	 
+	 <select id="findDeptByDeptno" resultMap="dept">
+	 	SELECT deptno,dname,loc FROM mydept WHERE deptno=#{deptno,jdbcType=INTEGER}
+	 </select>
+</mapper>  

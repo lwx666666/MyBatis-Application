@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mars.dao.IMyEmpDao">
+	<resultMap type="com.mars.model.MyEmp" id="joinSelect">
+		<id column="empno" property="empno"/>
+		<result column="ename" property="ename"/>
+		<result column="job" property="job"/>
+		<result column="sal" property="sal"/>
+		<result column="job" property="job"/>
+		<result column="hiredate" property="hiredate"/>
+		<!-- dept是MyEmp中的属性，联合查询，级联属性封装结果集 -->
+		<result column="deptno" property="dept.deptno"/>
+		<result column="dname" property="dept.dname"/>
+		<result column="loc" property="dept.loc"/>
+	</resultMap>
+	<select id="findEmpAndDept" resultMap="joinSelect">
+		SELECT e.empno,e.ename,e.job,e.sal,e.hiredate,d.deptno,d.dname,d.loc
+		FROM myemp e LEFT JOIN mydept d
+		ON e.deptno=d.deptno
+	</select>
+	
+	<!-- 使用association标签实现表关联与对象关联的映射 
+		使用association标签可以使用分步查询，使用延迟加载技术
+	-->
+	<resultMap type="com.mars.model.MyEmp" id="joinSelect2">
+		<id column="empno" property="empno"/>
+		<result column="ename" property="ename"/>
+		<result column="job" property="job"/>
+		<result column="sal" property="sal"/>
+		<result column="job" property="job"/>
+		<result column="hiredate" property="hiredate"/>
+		<!-- 使用标签关联查询 -->
+		<association property="dept" javaType="com.mars.model.MyDept">
+			<id column="deptno" property="deptno"/>
+			<result column="dname" property="dname"/>
+			<result column="loc" property="loc"/>
+		</association>
+	</resultMap>
+	<select id="findEmpAndDept2" resultMap="joinSelect2">
+		SELECT e.empno,e.ename,e.job,e.sal,e.hiredate,d.deptno,d.dname,d.loc
+		FROM myemp e LEFT JOIN mydept d
+		ON e.deptno=d.deptno
+	</select>
+</mapper>  

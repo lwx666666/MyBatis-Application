@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"	  
+xmlns:p="http://www.springframework.org/schema/p"	   
+xmlns:mvc="http://www.springframework.org/schema/mvc"
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:tx="http://www.springframework.org/schema/tx"
+xmlns:context="http://www.springframework.org/schema/context"
+xsi:schemaLocation="
+http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd
+http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	
+	
+	<!--开启组件扫描-->
+	<context:component-scan base-package="com.mars" >
+		<!-- 只扫描控制器-->
+		<context:include-filter type="annotation" expression=" org.springframework.stereotype.Controller"/> 
+	</context:component-scan>
+	
+	<!--开启springmvc的注解驱动，相当于开启了注解映射器和适配器 
+		注解驱动默认加载很多参数，比如会默认加载json数据转换解析器-->
+	<mvc:annotation-driven/>
+	<!-- 处理静态资源 -->
+	<mvc:default-servlet-handler></mvc:default-servlet-handler>
+	
+	<!--配置视图解析器-->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/jsp/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+</beans>

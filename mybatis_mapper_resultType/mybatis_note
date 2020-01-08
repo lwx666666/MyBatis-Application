@@ -1,0 +1,53 @@
+Mybatis中Mapper接口中参数定义
+	1.单个参数
+		不做任何处理
+	2.传入多个参数
+		多个参数会被封装成一个map
+			key：param1...paramN
+			value：传入的参数值
+		#{}就是从map中获取指定的key的值
+	3.命名参数：明确指定封装参数时map的key，@Param("id")
+		多个参数会封装成一个map.
+			key:使用@Param注解指定的值
+			value：参数值
+			使用#{key}取值
+	4.多个参数可以传入普通javabean
+		如果多个参数正好是业务逻辑的数据模型。可以直接传入一个对象。
+		使用#{属性名}取值
+	5.传入Map
+		如果多个参数不是业务逻辑的数据模型，可以传入一个Map集合。在xml文件中直接使用#{key}取值
+	6.编写TO(Transfer Object)数据传输对象
+		如果多个参数不是业务模型中的数据，但是经常要用可以使用TO数据传输对象。
+	page{
+		int index;
+		int size;
+	}
+	7.特别注意
+		如果是Collection(List,Set)类型或者是数组，也会特殊处理，是将传入的list或者数组封装在map中。
+		key：Collection(collection),如果是List可以使用key(list)
+			数组(array)
+		比如User getUserById(List<Integer> ids)
+			取值，取出第一个id的值#{list[0]}
+	8.${}和#{}的区别
+		#{}：使用预编译的形式，将参数设置到sql语句中：PreparedStatement；放置sql注入
+		${}：取出的值直接拼装在sql语句中，会有安全问题；
+		大多情况使用#{}，原生jdbc不支持占位符的地方使用${}进行取值
+		比如分表：
+			SELECT * FROM ${year}_salary WHERE xxx;
+			SELECT * FROM tbl_emp ORDER BY ${f_name} ${order}
+			SELECT * FROM tbl_emp WHERE ename LIKE '%${}%'
+	9.#{}的其它用法
+		规定参数的一些规则：
+			javaType、jdbcType、mode(存储过程)、numericScale、resultMap、typeHandler、jdbcTypeName、expression
+			javaType通常需要在某种特定的条件下被设置：
+				在存入数据为null的时候，有些数据库可能不能识别mybatis对null的默认处理，比如Oracle(报错)
+				mybatis中对所有的jdbcType中的null映射的是OTHER类型，Oracle中不识别，但是mysql可以识别
+				解决方法：
+					在全局配置中添加<setting name="jdbcTypeForNull" value="NULL"/>
+    10.resultMap
+    	实现高级结果集映射
+    	全局setting设置
+    		autoMapBehavior默认是PARTIAL开启自动映射功能，唯一的要求是列名称必须和对象字段名称一致。
+    		设置autoMapBehavior为null则会取消自动映射。
+    		数据库字段命名规范Pojo命名符合驼峰命名法，可以开启自动驼峰命名规则映射功能。mapUnderscoreToCamelCase=true。
+    		

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 每个实体类对应一个命名空间，命名空间可以根据实体类名称任意设置 -->
+<mapper namespace="com.mars.dao.MyEmpMapper">
+	<!-- 使用接口和查询绑定 -->
+	<select id="findById" resultType="emp" databaseId="orcl">
+		select empno,ename empName,mgr,hiredate,comm,sal,job from myemp where empno=#{id}
+	</select>
+	
+	<insert id="addUser"></insert>
+</mapper>  

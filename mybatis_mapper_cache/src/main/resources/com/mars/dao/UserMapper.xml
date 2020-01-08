@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mars.dao.UserMapper">
+	<cache-ref namespace="com.mars.dao.MyEmpMapperDynamicSQL"/>
+	<select id="selectByNameLike" resultType="com.mars.model.User">
+		SELECT * FROM t_user WHERE username LIKE #{username}
+	</select>
+	
+	<select id="getUserAsMap" resultType="map">
+		SELECT * FROM t_user WHERE id=#{id}
+	</select>
+	
+	<select id="getUserAsMap2" resultType="user">
+		SELECT * FROM t_user WHERE username LIKE #{username}
+	</select>
+	
+	<resultMap type="com.mars.model.User" id="userRst">
+		<id property="id" column="id"/>
+		<result property="username" column="username"/>
+		<result property="age" column="age"/>
+		<result property="email" column="email"/>
+	</resultMap>
+	
+	<select id="getUsersResultMap" resultMap="userRst">
+		SELECT * FROM t_user
+	</select>
+</mapper>  

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 每个实体类对应一个命名空间 -->
+<!-- 如果是接口创建模式namespace只能使用接口全路径 -->
+<mapper namespace="com.mars.dao.IMemberDao">
+	<!-- 查询所有 ，id名必须和接口中的方法名称一致-->
+	<select id="findAll" resultType="com.mars.model.Member">
+		SELECT * FROM member
+	</select>
+	<!-- 使用接口查询模式不需要参数类型说明 -->
+	<select id="findById" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE mid=#{id}
+	</select>
+	<!-- 增加 -->
+	<insert id="insert">
+		INSERT INTO member (mid,name,age,email)
+		VALUES(#{mid},#{name},#{age},#{email})
+	</insert>
+	<!-- 更新 -->
+	<update id="updateById">
+		UPDATE member 
+		SET name=#{name},age=#{age},email=#{email}
+		WHERE mid=#{mid}
+	</update>
+	<!-- 删除 -->
+	<delete id="deleteById">
+		DELETE FROM member WHERE mid=#{id}
+	</delete>
+	<!-- 多参数查询 
+		#{}采用预处理方式执行sql
+		${}非预处理执行sql
+	-->
+	<!-- <select id="findByNameAndEmail" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name LIKE '${param1}%' AND email='${param2}'
+	</select> -->
+	<select id="findByNameAndEmail" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name LIKE '${name}%' AND email='${email}'
+	</select>
+	<select id="findByName" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name=#{name}
+	</select>
+	
+	<select id="findByNameAndEmail2" resultType="com.mars.model.Member">
+		SELECT * FROM member WHERE name LIKE '${name}%' AND email='${email}'
+	</select>
+	
+	<!-- 批量删除集合形式 -->
+	<delete id="deleteByList">
+		DELETE FROM member WHERE mid IN
+		<foreach collection="list" open="(" separator="," close=")" item="mid">
+			#{mid}
+		</foreach>
+	</delete>
+	<!-- 批量删除数组形式 -->
+	<delete id="deleteByArray">
+		DELETE FROM member WHERE name IN
+		<foreach collection="array" open="(" separator="," close=")" item="name">
+			#{name}
+		</foreach>
+	</delete>
+	<!-- 批量新增集合形式 -->
+	<insert id="insertBySet" parameterType="com.mars.model.Member">
+		INSERT INTO 
+			member(mid,name,age,email) 
+		SELECT tmp.*
+		FROM(
+			<foreach collection="members" item="member" separator="UNION ALL">
+				SELECT
+					#{member.mid} mid,
+					#{member.name} name,
+					#{member.age} age,
+					#{member.email} email
+				FROM dual
+			</foreach>
+		) tmp
+		
+	</insert>
+	
+</mapper>  
